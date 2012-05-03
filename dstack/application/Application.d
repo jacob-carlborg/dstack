@@ -10,18 +10,25 @@ import mambo.core._;
 import mambo.sys.System;
 import mambo.util.Singleton;
 
+import dstack.application.ApplicationException;
+
 abstract class Application
 {
-	mixin Singleton;
-	
 	protected string[] args;
 	
-	static int start (T this) (string[] args)
+	static int start (this T) (string[] args)
 	{
-		T.instance._start(args);
+		auto app = T.instance;
+		app.args = args;
+		
+		debug
+			return app.debugStart();
+		
+		else
+			return app.releaseStart();
 	}
 	
-	private int releaseStart (string[] args)
+	private int releaseStart ()
 	{
 		try
 			run();
@@ -29,7 +36,7 @@ abstract class Application
 		catch (ApplicationException e)
 		{
 			println("An error occurred: ", e);
-			return ExiteCode.failure;
+			return ExitCode.failure;
 		}
 		
 		catch (Exception e)
@@ -38,13 +45,13 @@ abstract class Application
 			throw e;
 		}
 		
-		return ExiteCode.sucess;
+		return ExitCode.success;
 	}
 	
-	private int debugStart (string[] args)
+	private int debugStart ()
 	{
 		run();
-		return ExiteCode.sucess;
+		return ExitCode.success;
 	}
 
 	protected abstract void run ();
