@@ -9,23 +9,38 @@ module dstack.application.Application;
 import mambo.core._;
 import mambo.sys.System;
 import mambo.util.Singleton;
+import mambo.arguments.Arguments;
 
 import dstack.application.ApplicationException;
 
 abstract class Application
 {
-	protected string[] args;
+	private Arguments arguments_;
+	private string[] rawArgs;
 	
 	static int start (this T) (string[] args)
 	{
-		auto app = T.instance;
-		app.args = args;
-		
-		debug
-			return app.debugStart();
-		
+		Application app = T.instance;
+		app.arguments_ = new Arguments;
+		app.rawArgs = args;
+
+		app.setupArguments();
+		app.processArguments();
+
+		if (app.arguments.help)
+		{
+			app.showHelp();
+			return ExitCode.success;
+		}
+
 		else
-			return app.releaseStart();
+		{
+			debug
+				return app.debugStart();
+
+			else
+				return app.releaseStart();
+		}
 	}
 	
 	private int releaseStart ()
@@ -39,7 +54,7 @@ abstract class Application
 			return ExitCode.failure;
 		}
 		
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			println("An unknown error occurred: ", e);
 			throw e;
@@ -55,4 +70,29 @@ abstract class Application
 	}
 
 	protected abstract void run ();
+
+	@property protected Arguments arguments () ()
+	{
+		return arguments_;
+	}
+
+	protected auto arguments (Args...) (Args args) if (Args.length > 0)
+	{
+		return arguments_.option.opCall(args);
+	}
+
+	protected void setupArguments ()
+	{
+
+	}
+
+	private void processArguments ()
+	{
+		arguments.parse(rawArgs);
+	}
+
+	protected void showHelp ()
+	{
+		println(arguments.helpText);
+	}
 }
