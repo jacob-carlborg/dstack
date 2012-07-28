@@ -6,6 +6,8 @@
  */
 module dstack.application.Application;
 
+import tango.io.Stdout;
+
 import mambo.core._;
 import mambo.sys.System;
 import mambo.util.Singleton;
@@ -15,35 +17,91 @@ import dstack.application.ApplicationException;
 
 abstract class Application
 {
-	private Arguments arguments_;
-	private string[] rawArgs;
-	
+	private
+	{
+		Arguments arguments_;
+		string[] rawArgs;
+		bool help;
+	}
+
 	static int start (this T) (string[] args)
 	{
 		Application app = T.instance;
-		app.arguments_ = new Arguments;
-		app.rawArgs = args;
+		app.initialize(args);
 
-		app.setupArguments();
-		app.processArguments();
+		return app.help ? ExitCode.success : app._start();
+	}
 
-		if (app.arguments.help)
+	protected abstract void run ();
+
+	@property protected Arguments arguments () ()
+	{
+		return arguments_;
+	}
+
+	protected auto arguments (Args...) (Args args) if (Args.length > 0)
+	{
+		return arguments_.option.opCall(args);
+	}
+
+	protected void setupArguments () { }
+
+	private bool processArguments ()
+	{
+		return arguments.parse(rawArgs);
+	}
+
+	protected void showHelp ()
+	{
+		println(arguments.helpText);
+	}
+
+private:
+
+	bool initialize (string[] args)
+	{
+		arguments_ = new Arguments;
+		rawArgs = args;
+
+		handleArguments();
+
+		return true;
+	}
+
+	void handleArguments ()
+	{
+		_setupArguments();
+		auto valid = processArguments();
+
+		if (arguments.help)
 		{
-			app.showHelp();
-			return ExitCode.success;
+			help = true;
+			showHelp();
 		}
 
-		else
+		else if (!valid)
 		{
-			debug
-				return app.debugStart();
-
-			else
-				return app.releaseStart();
+			stderr(arguments.errors(&stderr.layout.sprint));
+			assert(0, "throw InvalidArgumentException");
 		}
 	}
-	
-	private int releaseStart ()
+
+	void _setupArguments ()
+	{
+		arguments("help", "Show this message and exit").aliased('h');
+		setupArguments();
+	}
+
+	int _start ()
+	{
+		debug
+			return debugStart();
+
+		else
+			return releaseStart();
+	}
+
+	int releaseStart ()
 	{
 		try
 			run();
@@ -63,36 +121,9 @@ abstract class Application
 		return ExitCode.success;
 	}
 	
-	private int debugStart ()
+	int debugStart ()
 	{
 		run();
 		return ExitCode.success;
-	}
-
-	protected abstract void run ();
-
-	@property protected Arguments arguments () ()
-	{
-		return arguments_;
-	}
-
-	protected auto arguments (Args...) (Args args) if (Args.length > 0)
-	{
-		return arguments_.option.opCall(args);
-	}
-
-	protected void setupArguments ()
-	{
-
-	}
-
-	private void processArguments ()
-	{
-		arguments.parse(rawArgs);
-	}
-
-	protected void showHelp ()
-	{
-		println(arguments.helpText);
 	}
 }
