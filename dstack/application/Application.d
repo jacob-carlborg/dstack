@@ -88,6 +88,8 @@ private:
 
 	void _setupArguments ()
 	{
+		arguments.formatter.appName = "dstep";
+		arguments.formatter.appVersion = "0.0.1";
 		arguments("help", "Show this message and exit").aliased('h');
 		setupArguments();
 	}
