@@ -81,7 +81,7 @@ private:
 
 		else if (!valid)
 		{
-			stderr(arguments.errors(&stderr.layout.sprint));
+			stderr(arguments.formatter.errors(&stderr.layout.sprint));
 			assert(0, "throw InvalidArgumentException");
 		}
 	}
