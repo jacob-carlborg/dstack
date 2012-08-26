@@ -14,9 +14,12 @@ import mambo.util.Singleton;
 import mambo.arguments.Arguments;
 
 import dstack.application.ApplicationException;
+import dstack.application.Configuration;
 
 abstract class Application
 {
+	Configuration config;
+
 	private
 	{
 		Arguments arguments_;
@@ -88,8 +91,8 @@ private:
 
 	void _setupArguments ()
 	{
-		arguments.formatter.appName = "dstep";
-		arguments.formatter.appVersion = "0.0.1";
+		arguments.formatter.appName = config.appName.toLower;
+		arguments.formatter.appVersion = config.appVersion;
 		arguments("help", "Show this message and exit").aliased('h');
 		setupArguments();
 	}
