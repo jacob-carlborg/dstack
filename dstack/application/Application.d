@@ -9,25 +9,33 @@ module dstack.application.Application;
 import mambo.core._;
 import mambo.sys.System;
 
-import dstack.application.ApplicationException;
 import dstack.component.ComponentManager;
 import dstack.controller.Controller;
+import dstack.core.Exceptions;
 
 abstract class Application : Controller
 {
+	private ComponentManager componentManager;
+
 	static int start (this T) (string[] args)
 	{
-		Application app = T.instance;
-		app.rawArgs = args;
-
-		ComponentManager.register(app);
-		ComponentManager.initialize();
-		auto continueExecution = ComponentManager.run();
-
-		return continueExecution ? app._start() : ExitCode.success;
+		return T.instance.bootstrap(args);
 	}
 
 private:
+
+	int bootstrap (string[] args)
+	{
+		rawArgs = args;
+
+		componentManager = new ComponentManager;
+		componentManager.register(this);
+		componentManager.initialize();
+
+		auto continueExecution = componentManager.run();
+
+		return continueExecution ? _start() : ExitCode.success;
+	}
 
 	int _start ()
 	{
@@ -42,25 +50,30 @@ private:
 	{
 		try
 			run();
-			
+
 		catch (ApplicationException e)
 		{
 			println("An error occurred: ", e);
 			return ExitCode.failure;
 		}
-		
+
 		catch (Throwable e)
 		{
 			println("An unknown error occurred: ", e);
 			throw e;
 		}
-		
+
 		return ExitCode.success;
 	}
-	
+
 	int debugStart ()
 	{
 		run();
 		return ExitCode.success;
 	}
+}
+
+class ApplicationException : DStackException
+{
+	mixin Constructor;
 }

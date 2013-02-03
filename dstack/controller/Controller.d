@@ -12,6 +12,7 @@ import mambo.arguments.Arguments;
 import mambo.core._;
 
 import dstack.component.Component;
+import dstack.controller.CommandManager;
 
 abstract class Controller : Component
 {
@@ -20,6 +21,7 @@ abstract class Controller : Component
 	private
 	{
 		Arguments arguments_;
+		CommandManager commandManager;
 		bool help;
 	}
 
@@ -28,20 +30,22 @@ abstract class Controller : Component
 		super.initialize();
 
 		arguments_ = new Arguments;
+		commandManager = new CommandManager;
 		handleArguments();
+		registerCommands(commandManager);
 	}
 
-	protected override bool run () 
+	protected override bool run ()
 	{
 		return super.run() && !help;
 	}
 
-	@property protected Arguments arguments () ()
+	final @property protected Arguments arguments () ()
 	{
 		return arguments_;
 	}
 
-	protected auto arguments (Args...) (Args args) if (Args.length > 0)
+	final protected auto arguments (Args...) (Args args) if (Args.length > 0)
 	{
 		return arguments_.option.opCall(args);
 	}
@@ -57,6 +61,8 @@ abstract class Controller : Component
 	{
 		println(arguments.helpText);
 	}
+
+	protected void registerCommands (CommandManager manager) { }
 
 private:
 

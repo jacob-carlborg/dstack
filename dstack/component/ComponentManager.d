@@ -14,40 +14,21 @@ import dstack.component.Component;
 
 final class ComponentManager
 {
-	mixin Singleton;
-
 	private Component[] components;
 
-	static void register (Component component)
-	{
-		ComponentManager.instance._register(component);
-	}
-
-	static void initialize ()
-	{
-		ComponentManager.instance._initialize();
-	}
-
-	static bool run ()
-	{
-		return ComponentManager.instance._run();
-	}
-
-private:
-
-	void _register (Component component)
+	void register (Component component)
 	{
 		components ~= component;
 	}
 
-	void _initialize ()
+	void initialize ()
 	{
 		foreach (component ; components)
 			component.initialize();
 	}
 
-	bool _run ()
+	bool run ()
 	{
-		return components.map!(c => c.run()).reduce!((a, b) => a && b)(true);
+		return components.map!(c => c.run()).reduce!(true, (a, b) => a && b);
 	}
 }
