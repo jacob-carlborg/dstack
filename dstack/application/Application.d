@@ -6,96 +6,28 @@
  */
 module dstack.application.Application;
 
-import tango.io.Stdout;
-
 import mambo.core._;
 import mambo.sys.System;
-import mambo.util.Singleton;
-import mambo.arguments.Arguments;
 
 import dstack.application.ApplicationException;
-import dstack.application.Configuration;
+import dstack.component.ComponentManager;
+import dstack.controller.Controller;
 
-abstract class Application
+abstract class Application : Controller
 {
-	Configuration config;
-
-	private
-	{
-		Arguments arguments_;
-		string[] rawArgs;
-		bool help;
-	}
-
 	static int start (this T) (string[] args)
 	{
 		Application app = T.instance;
-		app.initialize(args);
+		app.rawArgs = args;
 
-		return app.help ? ExitCode.success : app._start();
-	}
+		ComponentManager.register(app);
+		ComponentManager.initialize();
+		auto continueExecution = ComponentManager.run();
 
-	protected abstract void run ();
-
-	@property protected Arguments arguments () ()
-	{
-		return arguments_;
-	}
-
-	protected auto arguments (Args...) (Args args) if (Args.length > 0)
-	{
-		return arguments_.option.opCall(args);
-	}
-
-	protected void setupArguments () { }
-
-	private bool processArguments ()
-	{
-		return arguments.parse(rawArgs);
-	}
-
-	protected void showHelp ()
-	{
-		println(arguments.helpText);
+		return continueExecution ? app._start() : ExitCode.success;
 	}
 
 private:
-
-	bool initialize (string[] args)
-	{
-		arguments_ = new Arguments;
-		rawArgs = args;
-
-		handleArguments();
-
-		return true;
-	}
-
-	void handleArguments ()
-	{
-		_setupArguments();
-		auto valid = processArguments();
-
-		if (arguments.help)
-		{
-			help = true;
-			showHelp();
-		}
-
-		else if (!valid)
-		{
-			stderr(arguments.formatter.errors(&stderr.layout.sprint));
-			assert(0, "throw InvalidArgumentException");
-		}
-	}
-
-	void _setupArguments ()
-	{
-		arguments.formatter.appName = config.appName.toLower;
-		arguments.formatter.appVersion = config.appVersion;
-		arguments("help", "Show this message and exit").aliased('h');
-		setupArguments();
-	}
 
 	int _start ()
 	{
