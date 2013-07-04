@@ -45,7 +45,7 @@ class CommandManager
 		commands[name] = CommandWrapper(command);
 	}
 
-	void run (string name)
+	bool run (string name)
 	{
 		if (auto wrapper = name in commands)
 		{
@@ -55,11 +55,28 @@ class CommandManager
 			Component c = wrapper.command;
 
 			c.initialize();
-			c.run();
+			return c.run();
 		}
 
 		else
 			missingCommand(name);
+
+		return true;
+	}
+
+	package string findCommand (ref string[] rawArgs)
+	{
+		auto args = rawArgs;
+		auto command = args.filter!(e => !e.startsWith('-'))
+			.find!((string e) => e == "build");
+
+		if (command.any)
+		{
+			rawArgs = rawArgs.remove(command.front).toArray;
+			return command.front;
+		}
+
+		return null;
 	}
 
 private:
@@ -72,7 +89,7 @@ private:
 
 	string inferCommandName (ClassInfo classInfo)
 	{
-		auto className = classInfo.name.split(".").first;
+		auto className = classInfo.name.split(".").last;
 		return className.toLower;
 	}
 

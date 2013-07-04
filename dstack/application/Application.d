@@ -8,7 +8,10 @@ module dstack.application.Application;
 
 import mambo.core._;
 import mambo.sys.System;
+import mambo.util.Singleton;
 
+import dstack.application.Configuration;
+import dstack.application.DStack;
 import dstack.component.ComponentManager;
 import dstack.controller.Controller;
 import dstack.core.Exceptions;
@@ -27,17 +30,11 @@ private:
 	int bootstrap (string[] args)
 	{
 		rawArgs = args;
-
 		componentManager = new ComponentManager;
-		componentManager.register(this);
-		componentManager.initialize();
-
-		auto continueExecution = componentManager.run();
-
-		return continueExecution ? _start() : ExitCode.success;
+		return _start();
 	}
 
-	int _start ()
+	ExitCode _start ()
 	{
 		debug
 			return debugStart();
@@ -46,15 +43,17 @@ private:
 			return releaseStart();
 	}
 
-	int releaseStart ()
+	ExitCode releaseStart ()
 	{
+		ExitCode exitCode;
+
 		try
-			run();
+			exitCode = debugStart();
 
 		catch (ApplicationException e)
 		{
 			println("An error occurred: ", e);
-			return ExitCode.failure;
+			exitCode = ExitCode.failure;
 		}
 
 		catch (Throwable e)
@@ -63,12 +62,22 @@ private:
 			throw e;
 		}
 
-		return ExitCode.success;
+		return exitCode;
 	}
 
-	int debugStart ()
+	ExitCode debugStart ()
 	{
-		run();
+		// Register a dummy controller to handle --version and --help flags.
+		// The component chain will stop if any of the two flags above is
+		// encountered and the application will not be called.
+		auto argumentsController = new Controller;
+		argumentsController.rawArgs = rawArgs;
+		componentManager.register(argumentsController);
+		componentManager.register(this);
+
+		componentManager.initialize();
+		componentManager.run();
+
 		return ExitCode.success;
 	}
 }

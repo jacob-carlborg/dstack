@@ -14,7 +14,7 @@ import mambo.core._;
 import dstack.component.Component;
 import dstack.controller.CommandManager;
 
-abstract class Controller : Component
+class Controller : Component
 {
 	string[] rawArgs;
 
@@ -23,6 +23,7 @@ abstract class Controller : Component
 		Arguments arguments_;
 		CommandManager commandManager;
 		bool help;
+		string command;
 	}
 
 	protected override void initialize ()
@@ -31,13 +32,24 @@ abstract class Controller : Component
 
 		arguments_ = new Arguments;
 		commandManager = new CommandManager;
-		handleArguments();
 		registerCommands(commandManager);
+		_setupArguments();
 	}
 
 	protected override bool run ()
 	{
-		return super.run() && !help;
+		auto result = super.run();
+
+		if (!result)
+			return false;
+
+		handleArguments();
+		result = !help;
+
+		if (result && command.any)
+			result = result && commandManager.run(command);
+
+		return result;
 	}
 
 	final @property protected Arguments arguments () ()
@@ -68,7 +80,8 @@ private:
 
 	void handleArguments ()
 	{
-		_setupArguments();
+		command = commandManager.findCommand(rawArgs);
+
 		auto valid = processArguments();
 
 		if (arguments.help)

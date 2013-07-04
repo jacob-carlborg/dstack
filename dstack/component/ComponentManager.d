@@ -29,6 +29,10 @@ final class ComponentManager
 
 	bool run ()
 	{
-		return components.map!(c => c.run()).reduce!(true, (a, b) => a && b);
+		foreach (c ; components)
+            if (!c.run())
+                return false;
+
+		return true;
 	}
 }

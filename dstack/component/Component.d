@@ -6,11 +6,15 @@
  */
 module dstack.component.Component;
 
-import dstack.component.Configuration;
+import dstack.application.DStack;
+import dstack.application.Configuration;
 
 abstract class Component
 {
-	Configuration config;
+	@property final Configuration config ()
+	{
+		return DStack.config;
+	}
 
 	void initialize ()
 	{
