@@ -76,17 +76,14 @@ private:
 		_setupArguments();
 		auto valid = processArguments();
 
-		if (arguments.help)
+        if (!valid && !arguments.help)
+		    println(arguments.formatter.errors(&stderr.layout.sprint));
+
+		if (arguments.help || !valid)
 		{
 			help = true;
 			showHelp();
-		}
-
-		else if (!valid)
-		{
-			stderr(arguments.formatter.errors(&stderr.layout.sprint));
-			assert(0, "throw InvalidArgumentException");
-		}
+        }
 	}
 
 	void _setupArguments ()
