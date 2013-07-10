@@ -11,19 +11,34 @@ import tango.io.Stdout;
 import mambo.arguments.Arguments;
 import mambo.core._;
 
+import dstack.application.DStack;
 import dstack.component.Component;
 import dstack.controller.CommandManager;
 
 class Controller : Component
 {
-	string[] rawArgs;
-
 	private
 	{
 		Arguments arguments_;
 		CommandManager commandManager;
 		bool help;
+		bool processCommands;
 		string command;
+	}
+
+	this (bool processCommands = true)
+	{
+		this.processCommands = processCommands;
+	}
+
+	@property final string[] rawArgs ()
+	{
+		return DStack.application.rawArgs;
+	}
+
+	@property final string[] rawArgs (string[] args)
+	{
+		return DStack.application.rawArgs = args;
 	}
 
 	protected override void initialize ()
@@ -44,7 +59,7 @@ class Controller : Component
 			return false;
 
 		handleArguments();
-		result = !help;
+		result = !arguments.help;
 
 		if (result && command.any)
 			result = result && commandManager.run(command);
@@ -80,15 +95,18 @@ private:
 
 	void handleArguments ()
 	{
-		command = commandManager.findCommand(rawArgs);
+		if (processCommands)
+		{
+			auto args = rawArgs;
+			command = commandManager.findCommand(args);
+			rawArgs = args;
+		}
 
 		auto valid = processArguments();
+		rawArgs = arguments.rawArgs;
 
 		if (arguments.help)
-		{
-			help = true;
 			showHelp();
-		}
 
 		else if (!valid)
 		{

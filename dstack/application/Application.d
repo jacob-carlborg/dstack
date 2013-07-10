@@ -18,6 +18,8 @@ import dstack.core.Exceptions;
 
 abstract class Application : Controller
 {
+	string[] rawArgs;
+
 	private ComponentManager componentManager;
 
 	static int start (this T) (string[] args)
@@ -70,7 +72,7 @@ private:
 		// Register a dummy controller to handle --version and --help flags.
 		// The component chain will stop if any of the two flags above is
 		// encountered and the application will not be called.
-		auto argumentsController = new Controller;
+		auto argumentsController = new Controller(false);
 		argumentsController.rawArgs = rawArgs;
 		componentManager.register(argumentsController);
 		componentManager.register(this);
