@@ -26,9 +26,10 @@ class Controller : Component
 		string command;
 	}
 
-	this (bool processCommands = true)
+	this (bool processCommands = true, Arguments arguments = null)
 	{
 		this.processCommands = processCommands;
+		this.arguments_ = arguments;
 	}
 
 	@property final string[] rawArgs ()
@@ -45,7 +46,9 @@ class Controller : Component
 	{
 		super.initialize();
 
-		arguments_ = new Arguments;
+		if (!arguments_)
+			arguments_ = new Arguments;
+
 		commandManager = new CommandManager;
 		registerCommands(commandManager);
 		_setupArguments();

@@ -6,6 +6,7 @@
  */
 module dstack.application.Application;
 
+import mambo.arguments.Arguments;
 import mambo.core._;
 import mambo.sys.System;
 import mambo.util.Singleton;
@@ -21,10 +22,17 @@ abstract class Application : Controller
 	string[] rawArgs;
 
 	private ComponentManager componentManager;
+	private Arguments arguments_;
 
-	static int start (this T) (string[] args)
+	this ()
 	{
-		return T.instance.bootstrap(args);
+		arguments_ = new Arguments;
+		super(true, arguments_);
+	}
+
+	int start (string[] args)
+	{
+		return bootstrap(args);
 	}
 
 private:
@@ -72,7 +80,7 @@ private:
 		// Register a dummy controller to handle --version and --help flags.
 		// The component chain will stop if any of the two flags above is
 		// encountered and the application will not be called.
-		auto argumentsController = new Controller(false);
+		auto argumentsController = new Controller(false, arguments_);
 		argumentsController.rawArgs = rawArgs;
 		componentManager.register(argumentsController);
 		componentManager.register(this);
