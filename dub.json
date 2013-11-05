@@ -1,0 +1,17 @@
+{
+	"name": "dstack",
+	"description": "An application library for the D programming language",
+	"authors": ["Jacob Carlborg"],
+	"homepage": "https://github.com/jacob-carlborg/dstack",
+	"license": "BSL-1.0",
+	"copyright": "Copyright (c) 2013 Jacob Carlborg. All rights reserved.",
+
+	"targetType": "staticLibrary",
+	"targetName": "dstack",
+	"sourcePaths": ["dstack"],
+	"importPaths": ["."],
+
+	"dependencies": {
+		"mambo": "0.0.1-alpha"
+	}
+}
