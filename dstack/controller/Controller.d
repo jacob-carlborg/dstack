@@ -120,9 +120,9 @@ private:
 
 	void _setupArguments ()
 	{
+		setupArguments();
 		arguments.formatter.appName = config.appName.toLower;
 		arguments.formatter.appVersion = config.appVersion;
 		arguments("help", "Show this message and exit").aliased('h');
-		setupArguments();
 	}
 }
