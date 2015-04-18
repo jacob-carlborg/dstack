@@ -12,6 +12,8 @@
 	"importPaths": ["."],
 
 	"dependencies": {
-		"mambo": "0.0.3"
-	}
+		"mambo": "0.0.4"
+	},
+
+    "buildRequirements": ["allowWarnings"]
 }
