@@ -1,1 +1,4 @@
 *.deps
+*.a
+.dub
+dub.selections.json
