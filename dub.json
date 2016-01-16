@@ -12,6 +12,6 @@
 	"importPaths": ["."],
 
 	"dependencies": {
-		"mambo": "~>0.0.6"
+		"mambo": "~>0.0.7"
 	}
 }

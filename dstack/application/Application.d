@@ -77,9 +77,9 @@ private:
 		auto valid = processArguments();
 
         if (!valid && !arguments.help)
-		    println(arguments.formatter.errors(&stderr.layout.sprint));
+			println(arguments.formatter.errors(&stderr.layout.sprint));
 
-		if (arguments.help || !valid)
+		if (arguments.help || !valid || rawArgs.length <= 1)
 		{
 			help = true;
 			showHelp();
@@ -107,22 +107,22 @@ private:
 	{
 		try
 			run();
-			
+
 		catch (ApplicationException e)
 		{
 			println("An error occurred: ", e);
 			return ExitCode.failure;
 		}
-		
+
 		catch (Throwable e)
 		{
 			println("An unknown error occurred: ", e);
 			throw e;
 		}
-		
+
 		return ExitCode.success;
 	}
-	
+
 	int debugStart ()
 	{
 		run();
